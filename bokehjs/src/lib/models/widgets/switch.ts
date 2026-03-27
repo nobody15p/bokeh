@@ -1,7 +1,6 @@
 import {ToggleInput, ToggleInputView} from "./toggle_input"
 import {IconLike} from "../common/kinds"
 import {apply_icon} from "../common/resolve"
-import type {FullDisplay} from "../layouts/layout_dom"
 import type {StyleSheetLike, Keys} from "core/dom"
 import {div, undisplay} from "core/dom"
 import type * as p from "core/properties"
@@ -20,10 +19,6 @@ export class SwitchView extends ToggleInputView {
 
   override stylesheets(): StyleSheetLike[] {
     return [...super.stylesheets(), icons_css.default, switch_css.default]
-  }
-
-  protected override _intrinsic_display(): FullDisplay {
-    return {inner: this.model.flow_mode, outer: "flex"} // duplicates `display: flex`
   }
 
   override render(): void {
