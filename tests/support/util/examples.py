@@ -71,7 +71,7 @@ class Flags:
 
 
 class Example:
-    def __init__(self, path: str, flags: int, examples_dir: str, extensions: list[str] = []) -> None:
+    def __init__(self, path: str, flags: int, examples_dir: str, extensions: list[str] = [], min_python: str | None = None) -> None:
         self.path = normpath(path)
         self.flags = flags
         self.examples_dir = examples_dir
@@ -79,6 +79,7 @@ class Example:
         self._diff_ref = None
         self.pixels = 0
         self._has_ref = None
+        self.min_python = tuple(int(n) for n in min_python.split(".")) if min_python is not None else None
 
     def __str__(self) -> str:
         flags = [
@@ -148,17 +149,28 @@ class Example:
 
 All = Literal["all"]
 
-def add_examples(list_of_examples: list[Example], path: str, examples_dir: str, example_type: int | None = None,
-        slow: list[str] | All | None = None, skip: list[str] | All | None = None,
-        xfail: list[str] | All | None = None, no_js: list[str] | All | None = None) -> None:
-
+def add_examples(
+    list_of_examples: list[Example],
+    path: str,
+    examples_dir: str,
+    *,
+    example_type: int | None = None,
+    slow: list[str] | All | None = None,
+    skip: list[str] | All | None = None,
+    xfail: list[str] | All | None = None,
+    no_js: list[str] | All | None = None,
+    min_python: str | None = None,
+) -> None:
     example_pattern = normpath(join(examples_dir, path))
     example_path = normpath(example_pattern.strip("*"))
 
     for path in sorted(iglob(example_pattern, recursive=True)):
         flags = 0
         extensions: list[str] = []
-        orig_name = name = str(Path(path).relative_to(example_path))
+        if path != example_path:
+            orig_name = name = str(Path(path).relative_to(example_path))
+        else:
+            orig_name = name = path # this is a bit of a hack
 
         if name.startswith(('_', '.')):
             continue
@@ -199,7 +211,7 @@ def add_examples(list_of_examples: list[Example], path: str, examples_dir: str, 
         if no_js is not None and (no_js == 'all' or basename(orig_name) in no_js):
             flags |= Flags.no_js
 
-        list_of_examples.append(Example(join(example_path, name), flags, examples_dir, extensions))
+        list_of_examples.append(Example(join(example_path, name), flags, examples_dir, extensions, min_python))
 
 
 def collect_examples(config_path: str) -> list[Example]:
@@ -220,9 +232,10 @@ def collect_examples(config_path: str) -> list[Example]:
         skip_status = example.get("skip")
         xfail_status = example.get("xfail")
         no_js_status = example.get("no_js")
+        min_python = example.get("min_python")
 
         add_examples(list_of_examples, path, examples_dir,
-            example_type=example_type, slow=slow_status, skip=skip_status, xfail=xfail_status, no_js=no_js_status)
+            example_type=example_type, slow=slow_status, skip=skip_status, xfail=xfail_status, no_js=no_js_status, min_python=min_python)
 
     return list_of_examples
 

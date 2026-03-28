@@ -35,3 +35,6 @@
 - path: "examples/topics/**"
   slow: ["geo/choropleth.py"]
   no_js: ["geo/gmap.py"]
+
+- path: "examples/interaction/widgets/slider_template_string.py"
+  min_python: "3.14"
