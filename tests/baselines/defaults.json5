@@ -7773,7 +7773,6 @@
   },
   AbstractSlider: {
     __extends__: "Widget",
-    width: 300,
     value: {
       type: "symbol",
       name: "unset",
